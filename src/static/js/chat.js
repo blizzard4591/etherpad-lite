@@ -132,6 +132,16 @@ var chat = (function()
       var timeStr = hours + ":" + minutes;
 
       //create the authorclass
+      if (!msg.userId) {
+        /*
+         * If, for a bug or a database corruption, the message coming from the
+         * server does not contain the userId field (see for example #3731),
+         * let's be defensive and replace it with "unknown".
+         */
+        msg.userId = "unknown";
+        console.warn('The "userId" field of a chat message coming from the server was not present. Replacing with "unknown". This may be a bug or a database corruption.');
+      }
+
       var authorClass = "author-" + msg.userId.replace(/[^a-y0-9]/g, function(c)
       {
         if (c == ".") return "-";
@@ -149,7 +159,8 @@ var chat = (function()
         "text" : text,
         "sticky" : false,
         "timestamp" : msg.time,
-        "timeStr" : timeStr
+        "timeStr" : timeStr,
+        "duration" : 4000
       }
 
       // is the users focus already in the chatbox?
@@ -186,7 +197,7 @@ var chat = (function()
           count++;
           $("#chatcounter").text(count);
 
-          if(!chatOpen) {
+          if(!chatOpen && ctx.duration > 0) {
             $.gritter.add({
               // (string | mandatory) the heading of the notification
               title: ctx.authorName,
@@ -195,7 +206,7 @@ var chat = (function()
               // (bool | optional) if you want it to fade out on its own or just sit there
               sticky: ctx.sticky,
               // (int | optional) the time you want it to be alive for before fading out
-              time: '4000'
+              time: ctx.duration
             });
           }
         }
