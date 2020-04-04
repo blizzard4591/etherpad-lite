@@ -13,11 +13,20 @@ LABEL maintainer="Etherpad team, https://github.com/ether/etherpad-lite"
 #
 # EXAMPLE:
 #   ETHERPAD_PLUGINS="ep_codepad ep_author_neat"
-ARG ETHERPAD_PLUGINS=
+ARG ETHERPAD_PLUGINS="ep_tables2 ep_hash_auth ep_image_upload"
 
 # Set the following to production to avoid installing devDeps
 # this can be done with build args (and is mandatory to build ARM version)
-ENV NODE_ENV=development
+#ENV NODE_ENV=development
+ENV NODE_ENV=production
+
+# Get Etherpad-lite's other dependencies
+RUN apt-get update \
+  && apt-get install -y sqlite3 \
+  && apt-get install -y abiword sudo
+
+# Add Sudo for abiword
+RUN echo "etherpad ALL = NOPASSWD: /usr/bin/abiword" >> /etc/sudoers
 
 # Follow the principle of least privilege: run as unprivileged user.
 #
@@ -45,6 +54,11 @@ RUN for PLUGIN_NAME in ${ETHERPAD_PLUGINS}; do npm install "${PLUGIN_NAME}"; don
 
 # Copy the configuration file.
 COPY --chown=etherpad:etherpad ./settings.json.docker /opt/etherpad-lite/settings.json
+
+RUN npm install sqlite3
+
+# Allow changes to settings.conf as well as the Sqlite database being persistent.
+VOLUME /opt/etherpad-lite/var
 
 EXPOSE 9001
 CMD ["node", "node_modules/ep_etherpad-lite/node/server.js"]

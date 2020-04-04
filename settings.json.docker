@@ -249,7 +249,7 @@
    * it to null disables Abiword and will only allow plain text and HTML
    * import/exports.
    */
-  "abiword": null,
+  "abiword": "/usr/bin/abiword",
 
   /*
    * This is the absolute path to the soffice executable.
@@ -486,5 +486,14 @@
       */
 
       ]
-    } // logconfig
+    }, // logconfig
+    "ep_image_upload":{
+    "storage":{
+      "type": "local",
+      "baseFolder": "/opt/etherpad-lite/var/images",
+      "baseURL": "https://etherpad.giovio.de/images/"
+    },
+    "fileTypes": ["jpeg", "jpg", "bmp", "gif","png"],
+    "maxFileSize": 5000000
+  },
 }
